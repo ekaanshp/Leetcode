@@ -1,15 +1,27 @@
 class KthLargest {
-    int kth;
-    std::vector<int> input;
+    int k;
+    std::priority_queue<int, std::vector<int>, std::greater<int>> minHeap;
     
 public:
-    KthLargest(int k, vector<int>& nums) : kth(k), input(std::move(nums)){}
+    KthLargest(int k, vector<int>& nums) : k(k){
+        for(int value : nums){
+            addToHeap(value);
+        }
+    }
+
+    void addToHeap(int val){
+        if(minHeap.size() < k){
+            minHeap.push(val);
+        }
+        else if(val > minHeap.top()){
+            minHeap.pop();
+            minHeap.push(val);
+        }
+    }
     
     int add(int val) {
-        input.push_back(val);
-        auto target = input.end() - kth;
-        std::nth_element(input.begin(), target, input.end());
-        return *target;
+        addToHeap(val);
+        return minHeap.top();
     }
 };
 
