@@ -1,53 +1,47 @@
 class Solution {
 public:
     int findTheCity(int n, vector<vector<int>>& edges, int distanceThreshold) {
-        std::vector<std::vector<std::pair<int, int>>> adj(n);
-        for(const auto& edge : edges){
-            int v1 = edge[0];
-            int v2 = edge[1];
-            int dist = edge[2];
-
-            adj[v1].push_back({v2, dist});
-            adj[v2].push_back({v1, dist});
+        std::vector<std::vector<int>> dist(n, std::vector<int>(n, 1e7));
+        
+        for (int i = 0; i < n; ++i) {
+            dist[i][i] = 0;
         }
 
-        std::function<int(int)> dijkstra = [&](int src){
-            std::priority_queue<std::pair<int, int>, std::vector<std::pair<int, int>>, 
-            std::greater<std::pair<int, int>>> minHeap;
-            minHeap.push({0, src});
+        for (const auto& edge : edges) {
+            int u = edge[0];
+            int v = edge[1];
+            int w = edge[2];
+            dist[u][v] = w;
+            dist[v][u] = w;
+        }
 
-            std::vector<bool> visited(n, false);
-            while(!minHeap.empty()){
-                auto [dist, node] = minHeap.top();
-                minHeap.pop();
-                if(visited[node]){
-                    continue;
-                }
-                visited[node] = true;
-                for(const auto& [nei, dist2] : adj[node]){
-                    int neiDist = dist + dist2;
-                    if(neiDist <= distanceThreshold){
-                        minHeap.push({neiDist, nei});
+        for (int k = 0; k < n; ++k) {
+            for (int i = 0; i < n; ++i) {
+                for (int j = 0; j < n; ++j) {
+                    if (dist[i][k] + dist[k][j] < dist[i][j]) {
+                        dist[i][j] = dist[i][k] + dist[k][j];
                     }
                 }
-
             }
-
-            int reachable = std::count(visited.begin(), visited.end(), true);
-            return reachable - 1;
-        };
+        }
 
         int result = -1;
         int minCount = n;
-        for(int i = 0; i < n; i++){
-            int count = dijkstra(i);
+        
+        for (int i = 0; i < n; ++i) {
+            int count = 0;
+            for (int j = 0; j < n; ++j) {
+                if (i != j && dist[i][j] <= distanceThreshold) {
+                    count++;
+                }
+            }
 
-            if(count <= minCount){
-                result = i;
+            if (count <= minCount) {
                 minCount = count;
+                result = i;
             }
         }
-
+        
         return result;
     }
 };
