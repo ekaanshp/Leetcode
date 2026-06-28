@@ -1,37 +1,26 @@
 class Solution {
 public:
     int maximalSquare(vector<vector<char>>& matrix) {
+        if (matrix.empty() || matrix[0].empty()) return 0;
+        
         int rows = matrix.size();
         int cols = matrix[0].size();
-        std::vector<std::vector<int>> memo(rows, std::vector<int>(cols, -1));
 
-        std::function<int(int, int)> helper = [&](int r, int c){
-            if(r >= rows || c >= cols){
-                return 0;
-            }
-
-            if(memo[r][c] == -1){
-                int down = helper(r + 1, c);
-                int right = helper(r, c + 1);
-                int downRight = helper(r + 1, c + 1);
-                memo[r][c] = 0;
-
-                if(matrix[r][c] == '1'){
-                    memo[r][c] = 1 + std::min(down, std::min(right, downRight));
-                }
-            }
-            return memo[r][c];
-        };
-
-        helper(0, 0);
-        int max = 0;
-        for(int i = 0; i < rows; i++){
-            for(int j = 0; j < cols; j++){
-                if(memo[i][j] > max){
-                    max = memo[i][j];
+        vector<vector<int>> dp(rows + 1, vector<int>(cols + 1, 0));
+        int max_side = 0;
+        
+        for (int i = 1; i <= rows; ++i) {
+            for (int j = 1; j <= cols; ++j) {
+                if (matrix[i - 1][j - 1] == '1') {
+                    dp[i][j] = 1 + min({dp[i - 1][j],
+                                        dp[i][j - 1],
+                                        dp[i - 1][j - 1]});
+                    
+                    max_side = max(max_side, dp[i][j]);
                 }
             }
         }
-        return max * max;
+        
+        return max_side * max_side;
     }
 };
